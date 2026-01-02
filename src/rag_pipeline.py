@@ -25,7 +25,16 @@ def build_context(retrieved_docs: list[dict]) -> str:
     - Combine documents into a single context string
     - Keep within config.max_context_length if needed
     """
-    raise NotImplementedError("Implement build_context function")
+    context_parts = []
+    for doc in retrieved_docs:
+        doc_text = f"[{doc['source']}] {doc['title']}\n{doc['content']}"
+        context_parts.append(doc_text)
+    
+    context = "\n\n".join(context_parts)
+    if len(context) > config.max_context_length:
+        context = context[:config.max_context_length]
+    
+    return context
 
 
 def build_prompt(question: str, context: str) -> str:
@@ -37,7 +46,14 @@ def build_prompt(question: str, context: str) -> str:
     - Include the context and question
     - Guide the LLM to be helpful and accurate
     """
-    raise NotImplementedError("Implement build_prompt function")
+    return f"""You are a helpful support assistant for AcmeCloud services. Answer the question based on the provided context. If the context doesn't contain relevant information, say so.
+
+Context:
+{context}
+
+Question: {question}
+
+Answer:"""
 
 
 def answer_question(question: str) -> str:
@@ -55,4 +71,8 @@ def answer_question(question: str) -> str:
     if _documents is None or _embeddings is None:
         initialize()
     
-    raise NotImplementedError("Implement answer_question function")
+    retrieved_docs = retrieve(question, _documents, _embeddings)
+    context = build_context(retrieved_docs)
+    prompt = build_prompt(question, context)
+    answer = generate_response(prompt, model=config.llm_model)
+    return answer
