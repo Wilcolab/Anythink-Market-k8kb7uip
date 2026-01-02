@@ -12,7 +12,8 @@ def embed_texts(texts: list[str]) -> np.ndarray:
     - Use config.embedding_model for the model name
     - Return embeddings as a numpy array
     """
-    raise NotImplementedError("Implement embed_texts function")
+    embeddings = get_embeddings(texts, model=config.embedding_model)
+    return np.array(embeddings)
 
 
 def embed_documents(documents: list[dict]) -> tuple[list[dict], np.ndarray]:
@@ -24,4 +25,6 @@ def embed_documents(documents: list[dict]) -> tuple[list[dict], np.ndarray]:
     - Generate embeddings for all documents
     - Return tuple of (documents list, embeddings array)
     """
-    raise NotImplementedError("Implement embed_documents function")
+    texts = [f"{doc['title']}\n{doc['content']}" for doc in documents]
+    embeddings = embed_texts(texts)
+    return documents, embeddings
